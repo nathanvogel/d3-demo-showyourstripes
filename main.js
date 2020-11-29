@@ -1,13 +1,12 @@
 // ECAL 2020 Tech Talk by Nathan Vogel.
 
-// d3 has a bunch of shortcuts to modify the HTML DOM.
-// d3.select("body").style("background-color", "blue");
-// d3.select("p").style("color", "white");
-
+// Data from:
+// https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/download.html
+// The file annual-temperatures.txt is from:
 // https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/time_series/HadCRUT.4.6.0.0.annual_ns_avg.txt
 
 const url = "data/annual-temperatures.txt";
-let width = 1000;
+const width = 1000;
 const height = 500;
 const parseDateFromYear = d3.timeParse("%Y");
 const addAYear = (date) => {
@@ -34,9 +33,6 @@ const main = async () => {
       temperature: parseFloat(t.temp),
     };
   });
-
-  // width = Math.round(width / dataset.length) * dataset.length;
-  // svg.attr("viewBox", `0 0 ${dataset.length * 6} ${height}`);
 
   const temperatureMinMax = d3.extent(dataset, (d) => d.temperature);
   const dateMinMax = d3.extent(dataset, (d) => d.date);
@@ -115,7 +111,6 @@ const main = async () => {
     hoverinfoText.html("");
   });
 
-  // const updateWithData = (data) => {
   graph
     .selectAll("rect")
     .data(dataset)
@@ -151,22 +146,8 @@ const main = async () => {
               );
           }),
       (update) => undefined,
-      // .text((datum, index) => index + ": " + JSON.stringify(datum))
-      // .style("font-size", (d) => d.year / 100),
       (remove) => remove.remove()
     );
-  // };
-
-  // let currentIndex = 0;
-  // document.getElementById("removeButton").addEventListener("click", () => {
-  //   // const currentData = myNodes.data();
-  //   // console.log("Current:", currentData);
-  //   // myNodes.merge(currentData.slice(10, currentData.length));
-  //   currentIndex += 10;
-  //   updateWithData(temperatures.slice(currentIndex, temperatures.length));
-  // });
-
-  // updateWithData(temperatures);
 };
 
 main();
