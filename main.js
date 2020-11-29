@@ -7,35 +7,72 @@
 // https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/time_series/HadCRUT.4.6.0.0.annual_ns_avg.txt
 
 const url = "data/annual-temperatures.txt";
+const width = 1000;
+const height = 500;
+const getDateFromYear = d3.timeParse("%Y");
+
+const svg = d3
+  .select(".main")
+  .append("svg")
+  .attr("preserveAspectRatio", "xMinYMin meet")
+  .attr("viewBox", `0 0 ${width} ${height}`)
+  .style("overflow", "visible")
+  .classed("svg-content", true);
 
 async function main() {
   const temperatures = await d3.csv(url);
-  temperatures.forEach((t) => {
-    console.log(t);
-    t.year = parseInt(t.year);
-    t.temp = parseFloat(t.temp);
+  const dataset = temperatures.map((t) => {
+    return {
+      year: parseInt(t.year),
+      temperature: parseFloat(t.temp),
+    };
   });
 
-  console.log(temperatures);
-  // temperatures = [ { }]
+  console.log(dataset);
 
-  const updateWithData = (data) => {
-    let myNodes = d3
-      .select(".main")
-      .selectAll("p")
-      .data(data)
-      .join(
-        (enter) =>
-          enter
-            .append("p")
-            .text((datum, index) => index + ": " + JSON.stringify(datum))
-            .style("font-size", (d) => (d.year - 1849) / 2),
-        (update) => undefined,
-        // .text((datum, index) => index + ": " + JSON.stringify(datum))
-        // .style("font-size", (d) => d.year / 100),
-        (remove) => remove.remove()
-      );
-  };
+  const xScale = d3.scaleTime().rangeRound([0, width]);
+  const yScale = d3.scaleLinear().rangeRound([height, 0]);
+  xScale.domain(d3.extent(dataset, (d) => getDateFromYear(d.year.toString())));
+  yScale.domain(d3.extent(dataset, (d) => d.temperature));
+  const yaxis = d3
+    .axisLeft(yScale)
+    .tickFormat((temperature) => `${temperature} °C`);
+  const xaxis = d3.axisBottom(xScale);
+  // .ticks(
+  //   (xScale.domain()[1].getFullYear() - xScale.domain()[0].getFullYear()) / 4
+  // );
+  svg
+    .append("g")
+    .classed("axis", true)
+    .attr("transform", `translate(0, ${height})`)
+    .call(xaxis);
+  // .selectAll("g")
+  // .select("text")
+  // .style("transform", "rotate(45deg) translate(1em, 1em)");
+  svg
+    .append("g")
+    .classed("axis", true)
+    .attr("transform", `translate(0, 0)`)
+    .call(yaxis);
+
+  // const updateWithData = (data) => {
+  // let myNodes = d3
+  //   .select(".main")
+  //   .select("svg")
+  //   .selectAll("rect")
+  //   .data(data)
+  //   .join(
+  //     (enter) =>
+  //       enter
+  //         .append("p")
+  //         .text((datum, index) => index + ": " + JSON.stringify(datum))
+  //         .style("font-size", (d) => (d.year - 1849) / 2),
+  //     (update) => undefined,
+  //     // .text((datum, index) => index + ": " + JSON.stringify(datum))
+  //     // .style("font-size", (d) => d.year / 100),
+  //     (remove) => remove.remove()
+  //   );
+  // };
 
   // let currentIndex = 0;
   // document.getElementById("removeButton").addEventListener("click", () => {
@@ -46,7 +83,7 @@ async function main() {
   //   updateWithData(temperatures.slice(currentIndex, temperatures.length));
   // });
 
-  updateWithData(temperatures);
+  // updateWithData(temperatures);
 }
 
 main();
