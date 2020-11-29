@@ -1,6 +1,5 @@
 const width = 700;
 const height = 380;
-const dataUrl = "data.txt";
 const getDateFromYear = d3.timeParse("%Y");
 const addAYear = (date) => {
   const nextYear = new Date(date);
@@ -18,7 +17,7 @@ const svg = d3
 const graph = svg.append("g").classed("graph", true);
 
 const main = async () => {
-  const temperatures = await d3.csv(dataUrl);
+  const temperatures = await d3.csv("data.txt");
   const dataset = temperatures.map((row) => {
     return {
       date: getDateFromYear(row.year),
@@ -37,7 +36,7 @@ const main = async () => {
   // const colorScale = d3.scaleLinear().domain(tempMinMax).range(["blue", "red"]);
   const colorScale = d3
     .scaleSequential(d3.interpolateRdBu)
-    .domain([tempMinMax[1], tempMinMax[0]]);
+    .domain(tempMinMax.reverse());
 
   const hoverinfoRect = svg
     .append("rect")
@@ -67,55 +66,42 @@ const main = async () => {
   graph
     .selectAll("rect")
     .data(dataset)
-    .join(
-      (enter) =>
-        enter
-          .append("rect")
-          .attr("width", (d) => xScale(addAYear(d.date)) - xScale(d.date))
-          .attr("height", height)
-          .attr("fill", (d) => colorScale(d.temperature))
-          .attr("transform", (d) => `translate(${xScale(d.date)})`)
-          .on("mouseover", (event, d) => {
-            hoverinfoRect
-              .transition()
-              .ease(d3.easeQuadOut)
-              .duration(100)
-              .attr("fill", colorScale(d.temperature))
-              .attr("width", 50)
-              .attr("transform", `translate(${xScale(d.date) - 25})`);
-            hoverinfoText
-              .html(
-                d.date.getFullYear() +
-                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
-                  d.temperature.toFixed(2) +
-                  " °C"
-              )
-              .transition()
-              .ease(d3.easeQuadOut)
-              .duration(100)
-              .attr(
-                "transform",
-                `translate(${xScale(d.date) + 5}, ${height - 16}) rotate(-90)`
-              );
-          }),
-      (update) => undefined,
-      (remove) => remove.remove()
-    );
+    .enter()
+    .append("rect")
+    .attr("width", (d) => xScale(addAYear(d.date)) - xScale(d.date))
+    .attr("height", height)
+    .attr("fill", (d) => colorScale(d.temperature))
+    .attr("transform", (d) => `translate(${xScale(d.date)})`)
+    .on("mouseover", (event, d) => {
+      hoverinfoRect
+        .transition()
+        .ease(d3.easeQuadOut)
+        .duration(100)
+        .attr("fill", colorScale(d.temperature))
+        .attr("width", 50)
+        .attr("transform", `translate(${xScale(d.date) - 25})`);
+      hoverinfoText
+        .html(
+          d.date.getFullYear() +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+            d.temperature.toFixed(2) +
+            " °C"
+        )
+        .transition()
+        .ease(d3.easeQuadOut)
+        .duration(100)
+        .attr(
+          "transform",
+          `translate(${xScale(d.date) + 5}, ${height - 16}) rotate(-90)`
+        );
+    });
 
-  // const xaxis = d3.axisBottom(xScale);
-  // const yaxis = d3
+  // const xAxis = d3.axisBottom(xScale);
+  // const yAxis = d3
   //   .axisLeft(yScale)
   //   .tickFormat((temperature) => `${temperature} °C`);
-  // svg
-  //   .append("g")
-  //   .classed("axis", true)
-  //   .attr("transform", `translate(0, ${height})`)
-  //   .call(xaxis);
-  // svg
-  //   .append("g")
-  //   .classed("axis", true)
-  //   .attr("transform", `translate(0, 0)`)
-  //   .call(yaxis);
+  // svg.append("g").attr("transform", `translate(0, ${height})`).call(xAxis);
+  // svg.append("g").call(yAxis);
 
   // /** @type{d3.Line<{temperature: number; date: Date;}>} */
   // const line = d3.line();
