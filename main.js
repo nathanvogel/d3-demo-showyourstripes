@@ -39,6 +39,31 @@ const main = async () => {
     .scaleSequential(d3.interpolateRdBu)
     .domain([tempMinMax[1], tempMinMax[0]]);
 
+  const hoverinfoRect = svg
+    .append("rect")
+    .attr("id", "hoverinfoRect")
+    .style("pointer-events", "none")
+    .attr("width", 0)
+    .attr("height", height)
+    .attr("transform", "translate(0)")
+    .attr("fill", "white");
+  const hoverinfoText = svg
+    .append("text")
+    .attr("id", "hoverinfoText")
+    .style("pointer-events", "none")
+    .attr("height", height)
+    .attr("transform", `translate(0, ${height - 16}) rotate(-90)`)
+    .attr("fill", "black");
+
+  graph.on("mouseout", () => {
+    hoverinfoText.text("");
+    hoverinfoRect
+      .transition()
+      .ease(d3.easeQuadOut)
+      .duration(100)
+      .attr("width", 0);
+  });
+
   graph
     .selectAll("rect")
     .data(dataset)
@@ -49,7 +74,30 @@ const main = async () => {
           .attr("width", (d) => xScale(addAYear(d.date)) - xScale(d.date))
           .attr("height", height)
           .attr("fill", (d) => colorScale(d.temperature))
-          .attr("transform", (d) => `translate(${xScale(d.date)})`),
+          .attr("transform", (d) => `translate(${xScale(d.date)})`)
+          .on("mouseover", (event, d) => {
+            hoverinfoRect
+              .transition()
+              .ease(d3.easeQuadOut)
+              .duration(100)
+              .attr("fill", colorScale(d.temperature))
+              .attr("width", 50)
+              .attr("transform", `translate(${xScale(d.date) - 25})`);
+            hoverinfoText
+              .html(
+                d.date.getFullYear() +
+                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                  d.temperature.toFixed(2) +
+                  " °C"
+              )
+              .transition()
+              .ease(d3.easeQuadOut)
+              .duration(100)
+              .attr(
+                "transform",
+                `translate(${xScale(d.date) + 5}, ${height - 16}) rotate(-90)`
+              );
+          }),
       (update) => undefined,
       (remove) => remove.remove()
     );
