@@ -17,3 +17,5 @@ reload
 ```
 npm install
 ```
+
+Side note: The file `global.d.ts` might be optional depending on how smart your editor is.
