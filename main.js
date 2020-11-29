@@ -30,12 +30,10 @@ async function main() {
     };
   });
 
-  console.log(dataset);
-
   const xScale = d3.scaleTime().rangeRound([0, width]);
   const yScale = d3.scaleLinear().rangeRound([height, 0]);
   xScale.domain(d3.extent(dataset, (d) => d.date));
-  yScale.domain(d3.extent(dataset, (d) => d.temperature));
+  yScale.domain(d3.extent(dataset, (d) => d.temperature)).nice();
   const yaxis = d3
     .axisLeft(yScale)
     .tickFormat((temperature) => `${temperature} °C`);
