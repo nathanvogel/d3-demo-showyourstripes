@@ -9,7 +9,7 @@
 const url = "data/annual-temperatures.txt";
 const width = 1000;
 const height = 500;
-const getDateFromYear = d3.timeParse("%Y");
+const parseDateFromYear = d3.timeParse("%Y");
 
 const svg = d3
   .select(".main")
@@ -19,11 +19,13 @@ const svg = d3
   .style("overflow", "visible")
   .classed("svg-content", true);
 
+const graph = svg.append("g").attr("id", "graph");
+
 async function main() {
   const temperatures = await d3.csv(url);
   const dataset = temperatures.map((t) => {
     return {
-      year: parseInt(t.year),
+      date: parseDateFromYear(t.year),
       temperature: parseFloat(t.temp),
     };
   });
@@ -32,7 +34,7 @@ async function main() {
 
   const xScale = d3.scaleTime().rangeRound([0, width]);
   const yScale = d3.scaleLinear().rangeRound([height, 0]);
-  xScale.domain(d3.extent(dataset, (d) => getDateFromYear(d.year.toString())));
+  xScale.domain(d3.extent(dataset, (d) => d.date));
   yScale.domain(d3.extent(dataset, (d) => d.temperature));
   const yaxis = d3
     .axisLeft(yScale)
@@ -54,6 +56,20 @@ async function main() {
     .classed("axis", true)
     .attr("transform", `translate(0, 0)`)
     .call(yaxis);
+
+  /** @type{d3.Line<{temperature: number; date: Date;}>} */
+  const line = d3.line();
+
+  graph
+    .append("path")
+    .datum(dataset)
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 1)
+    .attr(
+      "d",
+      line.x((d) => xScale(d.date)).y((d) => yScale(d.temperature))
+    );
 
   // const updateWithData = (data) => {
   // let myNodes = d3
