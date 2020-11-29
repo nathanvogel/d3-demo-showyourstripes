@@ -88,8 +88,35 @@ const main = async () => {
   //     line.x((d) => xScale(d.date)).y((d) => yScale(d.temperature))
   //   );
 
+  const hoverinfoRect = svg
+    .append("rect")
+    .attr("id", "hoverinfo")
+    .attr("height", height)
+    .attr("width", 0)
+    .attr("transform", "translate(0)")
+    .style("pointer-events", "none");
+  const hoverinfoText = svg
+    .append("text")
+    .attr("fill", "black")
+    .attr("height", height)
+    .attr("width", 50)
+    .attr("transform", `translate(0, ${height - 16}) rotate(-90)`)
+    .style("pointer-events", "none")
+    .style("font-weight", "400")
+    .style("color", "black")
+    .style("font-size", "17px");
+
+  graph.on("mouseout", (e) => {
+    hoverinfoRect
+      .transition()
+      .duration(100)
+      .ease(d3.easeQuadOut)
+      .attr("width", 0);
+    hoverinfoText.html("");
+  });
+
   // const updateWithData = (data) => {
-  let myNodes = graph
+  graph
     .selectAll("rect")
     .data(dataset)
     .join(
@@ -99,7 +126,30 @@ const main = async () => {
           .attr("height", height)
           .attr("width", (d) => xScale(addAYear(d.date)) - xScale(d.date)) // round to pixels, unlike  width / dataset.length
           .attr("fill", (d) => colorScale(d.temperature))
-          .attr("transform", (d, i) => `translate(${xScale(d.date)})`),
+          .attr("transform", (d, i) => `translate(${xScale(d.date)})`)
+          .on("mouseover", (_event, d) => {
+            hoverinfoRect
+              .transition()
+              .duration(100)
+              .ease(d3.easeQuadOut)
+              .attr("transform", `translate(${xScale(d.date) - 25})`)
+              .attr("width", 50)
+              .attr("fill", colorScale(d.temperature));
+            hoverinfoText
+              .html(
+                d.date.getFullYear() +
+                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                  d.temperature.toFixed(2) +
+                  " °C"
+              )
+              .transition()
+              .duration(100)
+              .ease(d3.easeQuadOut)
+              .attr(
+                "transform",
+                `translate(${xScale(d.date) + 5}, ${height - 16}) rotate(-90)`
+              );
+          }),
       (update) => undefined,
       // .text((datum, index) => index + ": " + JSON.stringify(datum))
       // .style("font-size", (d) => d.year / 100),
