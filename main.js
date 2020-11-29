@@ -34,28 +34,28 @@ const main = async () => {
     };
   });
 
-  const temperatureMinMax = d3.extent(dataset, (d) => d.temperature);
+  const tempMinMax = d3.extent(dataset, (d) => d.temperature);
   const dateMinMax = d3.extent(dataset, (d) => d.date);
   dateMinMax[1] = addAYear(dateMinMax[1]);
   const xScale = d3.scaleTime().rangeRound([0, width]).domain(dateMinMax);
   const yScale = d3
     .scaleLinear()
     .rangeRound([height, 0])
-    .domain(temperatureMinMax)
+    .domain(tempMinMax)
     .nice();
   const colorScale = d3
     .scaleSequential(d3.interpolateRdBu)
-    .domain([temperatureMinMax[1], temperatureMinMax[0]]);
+    .domain([tempMinMax[1], tempMinMax[0]]);
   // @ts-ignore
   // const colorScale = d3.scaleLinear().range(["red", "blue"]);
 
-  // const yaxis = d3
-  //   .axisLeft(yScale)
-  //   .tickFormat((temperature) => `${temperature} °C`);
   // const xaxis = d3.axisBottom(xScale);
   // // .ticks(
   // //   (xScale.domain()[1].getFullYear() - xScale.domain()[0].getFullYear()) / 4
   // // );
+  // const yaxis = d3
+  //   .axisLeft(yScale)
+  //   .tickFormat((temperature) => `${temperature} °C`);
   // svg
   //   .append("g")
   //   .classed("axis", true)
