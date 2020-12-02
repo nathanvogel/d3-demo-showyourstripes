@@ -45,6 +45,8 @@ const main = async () => {
   // So xScale is a little function that goes
   // - from  [1850, 2020] as Date object inputs
   // - to    [0, 700] as number outputs.
+  // We use rangeRound() instead of range() so that d3 takes care of
+  // aligning anything (axis 'ticks', our rects, etc.) pixel-perfectly.
   const xScale = d3.scaleTime().domain(dateMinMax).rangeRound([0, width]);
   const yScale = d3
     .scaleLinear()
@@ -82,6 +84,11 @@ const main = async () => {
     .data(dataset)
     .enter()
     .append("rect")
+    // We use this year difference trick to let rangeRound() decide which
+    // rect should be rounded to 1px more, or 1px less.
+    // This way, everything is super sharp and there are no blurry pixels.
+    // Note: if we set the width of the dataviz to a multiple of our dataset length
+    // (170 years, so 680px or 850px), this is not needed.
     .attr("width", (d) => xScale(addYears(d.date, 1)) - xScale(d.date))
     .attr("height", height)
     .attr("fill", (d) => colorScale(d.temperature))
